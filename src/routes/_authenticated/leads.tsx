@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Pencil, Trash2, Database, Loader2 } from "lucide-react";
@@ -159,7 +159,7 @@ function LeadsPage() {
     setDialogOpen(true);
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) { toast.error("Informe o nome do lead."); return; }
     saveMutation.mutate();
