@@ -132,7 +132,11 @@ function LeadsPage() {
   const seedMutation = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
-      const rows = sampleLeads.map((l) => ({ ...l, created_by: userData.user?.id }));
+      const rows = sampleLeads.map((l) => ({
+        ...l,
+        status: l.status as Lead["status"],
+        created_by: userData.user?.id,
+      }));
       const { error } = await supabase.from("leads").insert(rows);
       if (error) throw error;
     },
