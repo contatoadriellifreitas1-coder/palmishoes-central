@@ -12,13 +12,20 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/palmishoes-logo.png";
 
-const nav = [
+type NavItem = {
+  to: "/" | "/leads" | "/chatbot" | "/social" | "/settings";
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const nav: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/leads", label: "Leads & CRM", icon: Users },
   { to: "/chatbot", label: "Chatbot", icon: Bot },
   { to: "/social", label: "Mídias & Catálogo", icon: Radio },
   { to: "/settings", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
