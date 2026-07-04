@@ -1,0 +1,3 @@
+# Internal management panel — not for public indexing
+User-agent: *
+Disallow: /
