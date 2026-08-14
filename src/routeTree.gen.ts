@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedChatbotRouteImport } from './routes/_authenticated/chatbot'
+import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -31,14 +31,9 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthenticatedChatbotRoute = AuthenticatedChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
@@ -46,9 +41,14 @@ const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedChatbotRoute = AuthenticatedChatbotRouteImport.update({
-  id: '/chatbot',
-  path: '/chatbot',
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
@@ -101,18 +101,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -122,18 +122,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/social': {
-      id: '/_authenticated/social'
-      path: '/social'
-      fullPath: '/social'
-      preLoaderRoute: typeof AuthenticatedSocialRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+    '/_authenticated/chatbot': {
+      id: '/_authenticated/chatbot'
+      path: '/chatbot'
+      fullPath: '/chatbot'
+      preLoaderRoute: typeof AuthenticatedChatbotRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leads': {
@@ -143,11 +136,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/chatbot': {
-      id: '/_authenticated/chatbot'
-      path: '/chatbot'
-      fullPath: '/chatbot'
-      preLoaderRoute: typeof AuthenticatedChatbotRouteImport
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/social': {
+      id: '/_authenticated/social'
+      path: '/social'
+      fullPath: '/social'
+      preLoaderRoute: typeof AuthenticatedSocialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
