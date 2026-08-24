@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Instagram, Facebook, Linkedin, MessageCircle, RefreshCw, Calendar, CheckCircle2, CircleDashed, Loader2,
@@ -9,7 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { socialMentions, catalogItems, agenda, type SocialMention } from "@/lib/mock-data";
+
+type SocialMention = {
+  id: string;
+  platform: "instagram" | "facebook" | "whatsapp" | "linkedin";
+  author: string;
+  handle: string | null;
+  message: string;
+  sentiment: "positivo" | "neutro" | "negativo";
+  occurred_at: string;
+};
 
 export const Route = createFileRoute("/_authenticated/social")({
   component: SocialPage,
@@ -29,21 +38,35 @@ const sentimentMeta: Record<SocialMention["sentiment"], string> = {
 };
 
 function SocialPage() {
-  const [syncing, setSyncing] = useState(false);
-  const [lastSync, setLastSync] = useState("há 6 min");
-  const [items, setItems] = useState(catalogItems);
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["social-data"],
+    queryFn: async () => {
+      const [mentionsRes, itemsRes, agendaRes] = await Promise.all([
+        supabase.from("social_mentions").select("*").order("occurred_at", { ascending: false }),
+        supabase.from("catalog_items").select("*").order("name"),
+        supabase.from("agenda_events").select("*").order("event_date"),
+      ]);
+      if (mentionsRes.error) throw mentionsRes.error;
+      if (itemsRes.error) throw itemsRes.error;
+      if (agendaRes.error) throw agendaRes.error;
+      return { mentions: mentionsRes.data as SocialMention[], items: itemsRes.data, agenda: agendaRes.data };
+    },
+  });
+  const items = data?.items ?? [];
+  const mentions = data?.mentions ?? [];
+  const agenda = data?.agenda ?? [];
 
-  const sync = () => {
-    setSyncing(true);
-    setTimeout(() => {
-      setItems((prev) => prev.map((i) => ({ ...i, synced: true })));
-      setSyncing(false);
-      setLastSync("agora mesmo");
-      toast.success("Catálogo sincronizado com sucesso.");
-    }, 1400);
-  };
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("catalog_items").update({ synced_at: new Date().toISOString() }).is("synced_at", null);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["social-data"] }); toast.success("Catálogo sincronizado com sucesso."); },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Erro ao sincronizar catálogo"),
+  });
 
-  const pending = items.filter((i) => !i.synced).length;
+  const pending = items.filter((i) => !i.synced_at).length;
 
   return (
     <div className="space-y-6">
@@ -63,7 +86,7 @@ function SocialPage() {
             <Badge variant="outline" className="bg-info/10 text-info border-info/20">Simulado</Badge>
           </div>
           <div className="divide-y divide-border">
-            {socialMentions.map((m) => {
+            {isLoading ? <p className="p-5 text-sm text-muted-foreground">Carregando feed...</p> : mentions.map((m) => {
               const Meta = platformMeta[m.platform];
               return (
                 <div key={m.id} className="flex gap-3 px-5 py-4 hover:bg-muted/40">
@@ -75,7 +98,7 @@ function SocialPage() {
                       <Badge variant="outline" className={cn("ml-auto text-[10px]", sentimentMeta[m.sentiment])}>{m.sentiment}</Badge>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{m.message}</p>
-                    <p className="mt-1 text-xs text-muted-foreground/70">{m.time}</p>
+                    <p className="mt-1 text-xs text-muted-foreground/70">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(m.occurred_at))}</p>
                   </div>
                 </div>
               );
@@ -89,10 +112,10 @@ function SocialPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Sincronização de Catálogo</h3>
-                <p className="text-xs text-muted-foreground">Última: {lastSync}</p>
+                <p className="text-xs text-muted-foreground">Dados persistidos no Supabase</p>
               </div>
-              <Button size="sm" onClick={sync} disabled={syncing}>
-                {syncing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+              <Button size="sm" onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}>
+                {syncMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
                 Sincronizar
               </Button>
             </div>
@@ -104,7 +127,7 @@ function SocialPage() {
                     <p className="truncate text-sm font-medium text-foreground">{it.name}</p>
                     <p className="text-xs text-muted-foreground">{it.sku} · {it.stock.toLocaleString("pt-BR")} un.</p>
                   </div>
-                  {it.synced ? (
+                  {it.synced_at ? (
                     <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-success" />
                   ) : (
                     <CircleDashed className="h-4.5 w-4.5 shrink-0 text-muted-foreground" />
@@ -125,7 +148,7 @@ function SocialPage() {
                   <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
                   <div>
                     <p className="text-sm font-medium text-foreground">{e.title}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{e.date} · {e.type}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(e.event_date))} · {e.event_type}</p>
                   </div>
                 </div>
               ))}

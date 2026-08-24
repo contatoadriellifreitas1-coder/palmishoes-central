@@ -36,7 +36,7 @@ vercel --prod
 **Variáveis de Ambiente no Vercel:**
 ```
 VITE_SUPABASE_URL=seu-url-aqui
-VITE_SUPABASE_ANON_KEY=sua-chave-aqui
+VITE_SUPABASE_PUBLISHABLE_KEY=sua-chave-aqui
 ```
 
 ---
@@ -174,12 +174,12 @@ server {
 1. **Pegue as credenciais do Supabase:**
    - Acesse [supabase.com](https://supabase.com)
    - Vá em Project Settings > API
-   - Copie `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
+  - Copie `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`
 
 2. **Crie um `.env.local` com as credenciais:**
    ```
    VITE_SUPABASE_URL=https://xxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJhbGc...
+  VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGc...
    ```
 
 3. **As tabelas já existem:**

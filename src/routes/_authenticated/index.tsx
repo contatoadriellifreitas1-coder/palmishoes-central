@@ -20,7 +20,6 @@ import { StatCard } from "@/components/panel/stat-card";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { salesTrend, errorsByType } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -43,10 +42,20 @@ function Dashboard() {
         supabase.from("leads").select("id,name,company,status,estimated_value,created_at").order("created_at", { ascending: false }),
         supabase.from("chatbot_flows").select("id,status"),
       ]);
+      const [salesRes, errorsRes] = await Promise.all([
+        supabase.from("sales_metrics").select("month,sales,target").order("month", { ascending: true }),
+        supabase.from("error_metrics").select("error_type,occurrences").order("occurrences", { ascending: false }),
+      ]);
       const leads = leadsRes.data ?? [];
       const flows = flowsRes.data ?? [];
       return {
         leads,
+        salesTrend: (salesRes.data ?? []).map((item) => ({
+          month: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(new Date(`${item.month}T12:00:00`)),
+          vendas: Number(item.sales),
+          meta: Number(item.target),
+        })),
+        errorsByType: (errorsRes.data ?? []).map((item) => ({ tipo: item.error_type, qtd: item.occurrences })),
         newLeads: leads.filter((l) => l.status === "novo").length,
         pipeline: leads.filter((l) => l.status !== "fechado").reduce((s, l) => s + Number(l.estimated_value ?? 0), 0),
         activeFlows: flows.filter((f) => f.status === "active").length,
@@ -65,7 +74,7 @@ function Dashboard() {
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Volume de Vendas (mês)" value={brl(203100)} icon={DollarSign} trend={16.2} trendLabel="vs. mês anterior" />
+        <StatCard label="Volume de Vendas (mês)" value={brl(data?.salesTrend.at(-1)?.vendas ?? 0)} icon={DollarSign} loading={isLoading} trendLabel="último período registrado" />
         <StatCard label="Taxa de Erros / Logística" value="2,4%" icon={AlertTriangle} trend={-0.8} trendLabel="vs. mês anterior" />
         <StatCard label="Leads Recentes" value={String(data?.newLeads ?? 0)} icon={UserPlus} loading={isLoading} trend={data?.newLeads ? 12 : 0} trendLabel="novos aguardando" />
         <StatCard label="Status do Chatbot" value={`${data?.activeFlows ?? 0} ativas`} icon={Bot} loading={isLoading} trendLabel={`${data?.totalFlows ?? 0} campanhas totais`} />
@@ -81,7 +90,7 @@ function Dashboard() {
           </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesTrend} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+              <AreaChart data={data?.salesTrend ?? []} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="fillVendas" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.25} />
@@ -110,7 +119,7 @@ function Dashboard() {
           </div>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={errorsByType} layout="vertical" margin={{ top: 0, right: 12, left: 8, bottom: 0 }}>
+              <BarChart data={data?.errorsByType ?? []} layout="vertical" margin={{ top: 0, right: 12, left: 8, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                 <XAxis type="number" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="tipo" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} width={72} />

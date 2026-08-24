@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_type: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          event_type: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_type?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          sku: string
+          stock: number
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          sku: string
+          stock?: number
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          sku?: string
+          stock?: number
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chatbot_flows: {
         Row: {
           created_at: string
@@ -43,6 +103,33 @@ export type Database = {
           name?: string
           status?: Database["public"]["Enums"]["flow_status"]
           steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      error_metrics: {
+        Row: {
+          created_at: string
+          error_type: string
+          id: string
+          month: string
+          occurrences: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_type: string
+          id?: string
+          month: string
+          occurrences?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          month?: string
+          occurrences?: number
           updated_at?: string
         }
         Relationships: []
@@ -119,6 +206,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          month: string
+          sales: number
+          target: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          month: string
+          sales?: number
+          target?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          month?: string
+          sales?: number
+          target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           about_text: string | null
@@ -146,6 +260,60 @@ export type Database = {
           id?: string
           tagline?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      social_mentions: {
+        Row: {
+          author: string
+          created_at: string
+          handle: string | null
+          id: string
+          message: string
+          occurred_at: string
+          platform: string
+          sentiment: string
+        }
+        Insert: {
+          author: string
+          created_at?: string
+          handle?: string | null
+          id?: string
+          message: string
+          occurred_at?: string
+          platform: string
+          sentiment?: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+          handle?: string | null
+          id?: string
+          message?: string
+          occurred_at?: string
+          platform?: string
+          sentiment?: string
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          message: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          message?: string
         }
         Relationships: []
       }

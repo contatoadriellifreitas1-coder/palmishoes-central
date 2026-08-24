@@ -11,7 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { systemLogs, type SystemLog } from "@/lib/mock-data";
+
+type SystemLog = {
+  id: string;
+  level: "info" | "warn" | "error";
+  message: string;
+  created_at: string;
+};
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -42,6 +48,15 @@ function SettingsPage() {
       const { data, error } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
       if (error) throw error;
       return data as Settings | null;
+    },
+  });
+
+  const { data: logs = [] } = useQuery({
+    queryKey: ["system-logs"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("system_logs").select("*").order("created_at", { ascending: false }).limit(20);
+      if (error) throw error;
+      return data as SystemLog[];
     },
   });
 
@@ -118,14 +133,16 @@ function SettingsPage() {
           <h3 className="text-sm font-semibold text-foreground">Logs do Sistema</h3>
           <p className="mb-4 text-xs text-muted-foreground">Eventos recentes da plataforma</p>
           <div className="space-y-3">
-            {systemLogs.map((log) => {
+            {logs.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum evento registrado.</p>
+            ) : logs.map((log) => {
               const M = logMeta[log.level];
               return (
                 <div key={log.id} className="flex gap-3">
                   <M.icon className={cn("mt-0.5 h-4 w-4 shrink-0", M.className)} />
                   <div>
                     <p className="text-sm text-foreground">{log.message}</p>
-                    <p className="text-xs text-muted-foreground">{log.time}</p>
+                    <p className="text-xs text-muted-foreground">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(log.created_at))}</p>
                   </div>
                 </div>
               );
