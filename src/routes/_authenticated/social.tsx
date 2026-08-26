@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Instagram, Facebook, Linkedin, MessageCircle, RefreshCw, Calendar, CheckCircle2, CircleDashed, Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/panel/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
