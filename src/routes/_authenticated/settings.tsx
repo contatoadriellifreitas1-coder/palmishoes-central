@@ -24,12 +24,21 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 type Settings = {
-  id: string;
+  id?: string;
   brand_name: string;
   tagline: string | null;
   about_text: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+};
+
+const defaultSettings: Settings = {
+  brand_name: "Palmishoes",
+  tagline: "Soluções em palmilhas de alta qualidade",
+  about_text:
+    "Desde 2012, oferecemos soluções em palmilhas de alta qualidade com excelente custo-benefício, fabricadas com matérias-primas de primeira linha e sob medida para fábricas de calçados.",
+  contact_email: "contato@palmishoes.com.br",
+  contact_phone: "+55 18 99636-7930",
 };
 
 const logMeta: Record<SystemLog["level"], { icon: typeof Info; className: string }> = {
@@ -47,7 +56,7 @@ function SettingsPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("site_settings").select("*").limit(1).maybeSingle();
       if (error) throw error;
-      return data as Settings | null;
+      return (data as Settings | null) ?? defaultSettings;
     },
   });
 
@@ -60,17 +69,28 @@ function SettingsPage() {
     },
   });
 
-  useEffect(() => { if (data) setForm(data); }, [data]);
+  useEffect(() => {
+    if (data) setForm(data);
+    else setForm(defaultSettings);
+  }, [data]);
 
   const saveMutation = useMutation({
     mutationFn: async (s: Settings) => {
-      const { error } = await supabase.from("site_settings").update({
+      const payload = {
         brand_name: s.brand_name.trim() || "Palmishoes",
         tagline: s.tagline,
         about_text: s.about_text,
         contact_email: s.contact_email,
         contact_phone: s.contact_phone,
-      }).eq("id", s.id);
+      };
+
+      if (s.id) {
+        const { error } = await supabase.from("site_settings").update(payload).eq("id", s.id);
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase.from("site_settings").insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {

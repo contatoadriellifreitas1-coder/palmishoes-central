@@ -2,6 +2,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
+  Package2,
   Bot,
   Radio,
   Settings,
@@ -13,7 +14,7 @@ import { cn } from "@/lib/utils";
 import logo from "@/assets/palmishoes-logo.png";
 
 type NavItem = {
-  to: "/" | "/leads" | "/chatbot" | "/social" | "/settings";
+  to: "/" | "/leads" | "/orders" | "/chatbot" | "/social" | "/settings";
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
@@ -22,6 +23,7 @@ type NavItem = {
 const nav: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/leads", label: "Leads & CRM", icon: Users },
+  { to: "/orders", label: "Pedidos", icon: Package2 },
   { to: "/chatbot", label: "Chatbot", icon: Bot },
   { to: "/social", label: "Mídias & Catálogo", icon: Radio },
   { to: "/settings", label: "Configurações", icon: Settings },

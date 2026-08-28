@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedChatbotRouteImport } from './routes/_authenticated/chatbot'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 
@@ -41,6 +42,11 @@ const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/chatbot': typeof AuthenticatedChatbotRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
 }
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/chatbot': typeof AuthenticatedChatbotRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/': typeof AuthenticatedIndexRoute
@@ -74,21 +82,25 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/chatbot': typeof AuthenticatedChatbotRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chatbot' | '/leads' | '/settings' | '/social'
+  fullPaths:
+    '/' | '/auth' | '/chatbot' | '/leads' | '/orders' | '/settings' | '/social'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/chatbot' | '/leads' | '/settings' | '/social' | '/'
+  to:
+    '/auth' | '/chatbot' | '/leads' | '/orders' | '/settings' | '/social' | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/chatbot'
     | '/_authenticated/leads'
+    | '/_authenticated/orders'
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/'
@@ -136,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -156,6 +175,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatbotRoute: typeof AuthenticatedChatbotRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -164,6 +184,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatbotRoute: AuthenticatedChatbotRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Instagram, Facebook, Linkedin, MessageCircle, RefreshCw, Calendar, CheckCircle2, CircleDashed, Loader2,
+  Mail, MessageCircle, RefreshCw, Calendar, CheckCircle2, CircleDashed, Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/panel/page-header";
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 type SocialMention = {
   id: string;
-  platform: "instagram" | "facebook" | "whatsapp" | "linkedin";
+  platform: "email" | "whatsapp";
   author: string;
   handle: string | null;
   message: string;
@@ -25,11 +25,9 @@ export const Route = createFileRoute("/_authenticated/social")({
   component: SocialPage,
 });
 
-const platformMeta: Record<SocialMention["platform"], { icon: typeof Instagram; className: string }> = {
-  instagram: { icon: Instagram, className: "text-[oklch(0.6_0.22_10)]" },
-  facebook: { icon: Facebook, className: "text-[oklch(0.5_0.18_255)]" },
+const platformMeta: Record<SocialMention["platform"], { icon: typeof Mail; className: string }> = {
+  email: { icon: Mail, className: "text-[oklch(0.52_0.18_220)]" },
   whatsapp: { icon: MessageCircle, className: "text-[oklch(0.6_0.16_150)]" },
-  linkedin: { icon: Linkedin, className: "text-[oklch(0.5_0.14_240)]" },
 };
 
 const sentimentMeta: Record<SocialMention["sentiment"], string> = {
@@ -82,7 +80,7 @@ function SocialPage() {
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Menções & Mensagens</h3>
-              <p className="text-xs text-muted-foreground">Feed simulado das redes da marca</p>
+              <p className="text-xs text-muted-foreground">Feed dos contatos por e-mail e WhatsApp</p>
             </div>
             <Badge variant="outline" className="bg-info/10 text-info border-info/20">Simulado</Badge>
           </div>

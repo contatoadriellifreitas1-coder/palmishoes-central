@@ -20,7 +20,7 @@ CREATE TABLE public.error_metrics (
 
 CREATE TABLE public.social_mentions (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
-  platform TEXT NOT NULL CHECK (platform IN ('instagram', 'facebook', 'whatsapp', 'linkedin')),
+  platform TEXT NOT NULL CHECK (platform IN ('email', 'whatsapp')),
   author TEXT NOT NULL,
   handle TEXT,
   message TEXT NOT NULL,
@@ -100,10 +100,10 @@ INSERT INTO public.catalog_items (name, sku, category, stock, synced_at) VALUES
 
 INSERT INTO public.social_mentions (platform, author, handle, message, sentiment, occurred_at) VALUES
   ('whatsapp', 'Calçados Bella', '+55 18 99123-4567', 'Vocês têm palmilhas pré-prontas para tênis infantil em pronta entrega?', 'neutro', now() - interval '4 minutes'),
-  ('instagram', 'Ana Ferreira', '@anaf.calcados', 'Recebi a amostra das palmilhas personalizadas, acabamento impecável!', 'positivo', now() - interval '22 minutes'),
-  ('facebook', 'Indústria Passo Firme', 'Passo Firme Calçados', 'Qual o prazo mínimo de entrega para pedidos de 5.000 pares?', 'neutro', now() - interval '1 hour'),
-  ('instagram', 'Marcos Lima', '@marcoslima.shoes', 'O último lote veio com atraso de 3 dias, precisamos ajustar isso.', 'negativo', now() - interval '2 hours'),
-  ('linkedin', 'Grupo Ortopé', 'Ortopé Componentes', 'Interesse em parceria para linha de palmilhas anatômicas premium.', 'positivo', now() - interval '5 hours');
+  ('email', 'Ana Ferreira', 'ana@afcalcados.com.br', 'Recebi a amostra das palmilhas personalizadas, acabamento impecável!', 'positivo', now() - interval '22 minutes'),
+  ('email', 'Indústria Passo Firme', 'compras@passofirme.com', 'Qual o prazo mínimo de entrega para pedidos de 5.000 pares?', 'neutro', now() - interval '1 hour'),
+  ('whatsapp', 'Marcos Lima', '+55 47 99999-0011', 'O último lote veio com atraso de 3 dias, precisamos ajustar isso.', 'negativo', now() - interval '2 hours'),
+  ('email', 'Grupo Ortopé', 'parcerias@ortope.com.br', 'Interesse em parceria para linha de palmilhas anatômicas premium.', 'positivo', now() - interval '5 hours');
 
 INSERT INTO public.agenda_events (title, event_date, event_type) VALUES
   ('Entrega — Passo Firme (5.000 pares)', '2026-07-08 09:00:00-03', 'entrega'),

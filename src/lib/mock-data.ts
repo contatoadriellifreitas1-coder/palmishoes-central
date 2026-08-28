@@ -28,7 +28,7 @@ export const channelSplit = [
 
 export type SocialMention = {
   id: string;
-  platform: "instagram" | "facebook" | "whatsapp" | "linkedin";
+  platform: "email" | "whatsapp";
   author: string;
   handle: string;
   message: string;
@@ -48,36 +48,36 @@ export const socialMentions: SocialMention[] = [
   },
   {
     id: "2",
-    platform: "instagram",
+    platform: "email",
     author: "Ana Ferreira",
-    handle: "@anaf.calcados",
+    handle: "ana@afcalcados.com.br",
     message: "Recebi a amostra das palmilhas personalizadas, acabamento impecável! 👏",
     time: "há 22 min",
     sentiment: "positivo",
   },
   {
     id: "3",
-    platform: "facebook",
+    platform: "email",
     author: "Indústria Passo Firme",
-    handle: "Passo Firme Calçados",
+    handle: "compras@passofirme.com",
     message: "Qual o prazo mínimo de entrega para pedidos de 5.000 pares?",
     time: "há 1 h",
     sentiment: "neutro",
   },
   {
     id: "4",
-    platform: "instagram",
+    platform: "whatsapp",
     author: "Marcos Lima",
-    handle: "@marcoslima.shoes",
+    handle: "+55 47 99999-0011",
     message: "O último lote veio com atraso de 3 dias, precisamos ajustar isso.",
     time: "há 2 h",
     sentiment: "negativo",
   },
   {
     id: "5",
-    platform: "linkedin",
+    platform: "email",
     author: "Grupo Ortopé",
-    handle: "Ortopé Componentes",
+    handle: "parcerias@ortope.com.br",
     message: "Interesse em parceria para linha de palmilhas anatômicas premium.",
     time: "há 5 h",
     sentiment: "positivo",

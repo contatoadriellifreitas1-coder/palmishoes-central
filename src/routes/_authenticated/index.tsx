@@ -13,7 +13,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { DollarSign, AlertTriangle, UserPlus, Bot, ArrowRight } from "lucide-react";
+import { DollarSign, AlertTriangle, UserPlus, Bot, ArrowRight, Package2, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/panel/page-header";
 import { StatCard } from "@/components/panel/stat-card";
@@ -34,13 +34,22 @@ const statusMeta: Record<string, { label: string; className: string }> = {
   fechado: { label: "Fechado", className: "bg-success/15 text-success border-success/20" },
 };
 
+const orderStatusMeta: Record<string, { label: string; className: string }> = {
+  pendente: { label: "Pendente", className: "bg-muted text-muted-foreground border-border" },
+  em_producao: { label: "Em Produção", className: "bg-warning/20 text-warning-foreground border-warning/30" },
+  em_transito: { label: "Em Trânsito", className: "bg-info/15 text-info border-info/20" },
+  entregue: { label: "Entregue", className: "bg-success/15 text-success border-success/20" },
+  cancelado: { label: "Cancelado", className: "bg-destructive/10 text-destructive border-destructive/20" },
+};
+
 function Dashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-metrics"],
     queryFn: async () => {
-      const [leadsRes, flowsRes] = await Promise.all([
+      const [leadsRes, flowsRes, ordersRes] = await Promise.all([
         supabase.from("leads").select("id,name,company,status,estimated_value,created_at").order("created_at", { ascending: false }),
         supabase.from("chatbot_flows").select("id,status"),
+        supabase.from("orders").select("id,customer_name,product_name,status,total_value,created_at").order("created_at", { ascending: false }),
       ]);
       const [salesRes, errorsRes] = await Promise.all([
         supabase.from("sales_metrics").select("month,sales,target").order("month", { ascending: true }),
@@ -48,23 +57,36 @@ function Dashboard() {
       ]);
       const leads = leadsRes.data ?? [];
       const flows = flowsRes.data ?? [];
+      const orders = ordersRes.data ?? [];
+      const orderStatusBreakdown = ["pendente", "em_producao", "em_transito", "entregue", "cancelado"].map((status) => ({
+        status,
+        label: orderStatusMeta[status]?.label ?? status,
+        qtd: orders.filter((order) => order.status === status).length,
+        valor: orders.filter((order) => order.status === status).reduce((sum, order) => sum + Number(order.total_value ?? 0), 0),
+      }));
       return {
         leads,
+        orders,
         salesTrend: (salesRes.data ?? []).map((item) => ({
           month: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(new Date(`${item.month}T12:00:00`)),
           vendas: Number(item.sales),
           meta: Number(item.target),
         })),
         errorsByType: (errorsRes.data ?? []).map((item) => ({ tipo: item.error_type, qtd: item.occurrences })),
+        orderStatusBreakdown,
         newLeads: leads.filter((l) => l.status === "novo").length,
         pipeline: leads.filter((l) => l.status !== "fechado").reduce((s, l) => s + Number(l.estimated_value ?? 0), 0),
         activeFlows: flows.filter((f) => f.status === "active").length,
         totalFlows: flows.length,
+        totalOrderValue: orders.reduce((s, o) => s + Number(o.total_value ?? 0), 0),
+        activeOrders: orders.filter((o) => ["pendente", "em_producao", "em_transito"].includes(o.status)).length,
+        deliveredOrders: orders.filter((o) => o.status === "entregue").length,
       };
     },
   });
 
   const recentLeads = (data?.leads ?? []).slice(0, 5);
+  const recentOrders = (data?.orders ?? []).slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -75,9 +97,19 @@ function Dashboard() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Volume de Vendas (mês)" value={brl(data?.salesTrend.at(-1)?.vendas ?? 0)} icon={DollarSign} loading={isLoading} trendLabel="último período registrado" />
-        <StatCard label="Taxa de Erros / Logística" value="2,4%" icon={AlertTriangle} trend={-0.8} trendLabel="vs. mês anterior" />
+        <StatCard label="Faturamento em Pedidos" value={brl(data?.totalOrderValue ?? 0)} icon={Package2} loading={isLoading} trendLabel={`${data?.activeOrders ?? 0} pedidos ativos`} />
         <StatCard label="Leads Recentes" value={String(data?.newLeads ?? 0)} icon={UserPlus} loading={isLoading} trend={data?.newLeads ? 12 : 0} trendLabel="novos aguardando" />
         <StatCard label="Status do Chatbot" value={`${data?.activeFlows ?? 0} ativas`} icon={Bot} loading={isLoading} trendLabel={`${data?.totalFlows ?? 0} campanhas totais`} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
+        <StatCard label="Pedidos Ativos" value={String(data?.activeOrders ?? 0)} icon={Truck} loading={isLoading} trendLabel={`${data?.deliveredOrders ?? 0} entregues`} />
+        <StatCard label="Taxa de Erros / Logística" value="2,4%" icon={AlertTriangle} trend={-0.8} trendLabel="vs. mês anterior" />
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] xl:col-span-2">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Resumo de Pedidos</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">{brl(data?.totalOrderValue ?? 0)}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Valor total em todos os pedidos cadastrados</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -127,6 +159,72 @@ function Dashboard() {
                 <Bar dataKey="qtd" name="Ocorrências" fill="var(--color-primary)" radius={[0, 4, 4, 0]} barSize={18} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className="p-5 shadow-[var(--shadow-card)]">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Pedidos por Status</h3>
+            <p className="text-xs text-muted-foreground">Volume operacional por etapa</p>
+          </div>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data?.orderStatusBreakdown ?? []} layout="vertical" margin={{ top: 0, right: 12, left: 8, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
+                <XAxis type="number" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="label" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} width={86} />
+                <Tooltip
+                  cursor={{ fill: "var(--color-muted)" }}
+                  formatter={(value: number) => [String(value), "Pedidos"]}
+                  contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }}
+                />
+                <Bar dataKey="qtd" name="Pedidos" fill="var(--color-primary)" radius={[0, 4, 4, 0]} barSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="shadow-[var(--shadow-card)]">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Pedidos Recentes</h3>
+              <p className="text-xs text-muted-foreground">Últimos registros de faturamento e produção</p>
+            </div>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/orders">Ver todos <ArrowRight className="ml-1 h-4 w-4" /></Link>
+            </Button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-5 py-3 font-medium">Cliente</th>
+                  <th className="px-5 py-3 font-medium">Produto</th>
+                  <th className="px-5 py-3 font-medium">Valor</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">Carregando...</td></tr>
+                ) : recentOrders.length === 0 ? (
+                  <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">Nenhum pedido ainda. Adicione em Pedidos.</td></tr>
+                ) : (
+                  recentOrders.map((order) => (
+                    <tr key={order.id} className="border-b border-border/60 last:border-0 hover:bg-muted/40">
+                      <td className="px-5 py-3 font-medium text-foreground">{order.customer_name}</td>
+                      <td className="px-5 py-3 text-muted-foreground">{order.product_name}</td>
+                      <td className="px-5 py-3 tabular-nums">{brl(Number(order.total_value ?? 0))}</td>
+                      <td className="px-5 py-3">
+                        <Badge variant="outline" className={orderStatusMeta[order.status]?.className}>{orderStatusMeta[order.status]?.label}</Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </Card>
       </div>

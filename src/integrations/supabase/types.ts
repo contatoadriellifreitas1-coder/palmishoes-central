@@ -182,6 +182,60 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          company: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          product_name: string
+          quantity: number
+          status: Database["public"]["Enums"]["order_status"]
+          total_value: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          product_name: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_value?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          product_name?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_value?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -327,6 +381,7 @@ export type Database = {
     Enums: {
       flow_status: "draft" | "active"
       lead_status: "novo" | "em_contato" | "fechado"
+      order_status: "pendente" | "em_producao" | "em_transito" | "entregue" | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
