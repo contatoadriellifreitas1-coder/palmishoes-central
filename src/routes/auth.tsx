@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { secureLogin, secureSignup } from "@/integrations/supabase/secure-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,20 +51,19 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
-        if (error) throw error;
+        // ✅ SECURITY: Use secure login with rate limiting
+        const result = await secureLogin(parsed.data.email, parsed.data.password);
+        if (!result.success) {
+          throw new Error(result.error);
+        }
         toast.success("Acesso liberado. Bem-vindo!");
         navigate({ to: "/", replace: true });
       } else {
-        const { error } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName.trim() || undefined },
-          },
-        });
-        if (error) throw error;
+        // ✅ SECURITY: Use secure signup with rate limiting
+        const result = await secureSignup(parsed.data.email, parsed.data.password, fullName);
+        if (!result.success) {
+          throw new Error(result.error);
+        }
         toast.success("Conta criada. Você já pode acessar o painel.");
         navigate({ to: "/", replace: true });
       }
