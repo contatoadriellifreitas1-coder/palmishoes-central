@@ -1,3 +1,24 @@
+# ============================================================================
+# 🔒 SECURITY - Environment Variables & Secrets
+# ============================================================================
+
+# Environment files (NUNCA commitar)
+.env
+.env.*
+!.env.example
+
+# 🔒 Local development secrets
+.env.local
+.env.*.local
+
+# Variáveis de secrets
+secrets/
+.secrets/
+
+# ============================================================================
+# 📋 BUILD OUTPUT & DEPENDENCIES
+# ============================================================================
+
 # Logs
 logs
 *.log
@@ -7,29 +28,114 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
 .output
 .vinxi
 .tanstack/**
 .nitro
+
+# Development
 *.local
-.env
-.env.*
-!.env.example
+
+# ============================================================================
+# 🌐 DEPLOYMENT & PLATFORM SPECIFIC
+# ============================================================================
 
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
 
-# Editor directories and files
+# Vercel
+.vercel/
+.vercel-build-env
+
+# Netlify
+.netlify/
+
+# ============================================================================
+# 💾 DATABASE & LOCAL DATA
+# ============================================================================
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Local supabase
+supabase/functions/.env.local
+.supabase-local/
+
+# ============================================================================
+# 🎨 IDE & EDITOR
+# ============================================================================
+
+# IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# Editors
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# ============================================================================
+# 📝 DOCUMENTATION & NOTES
+# ============================================================================
+
+# IDE helper files
+.coderay_annotations
+.ruby-version
+
+# ============================================================================
+# 🧪 TESTING
+# ============================================================================
+
+# Coverage reports
+coverage/
+.coverage
+.nyc_output
+
+# Test results
+junit.xml
+test-results.xml
+
+# ============================================================================
+# 🔐 SECURITY NOTES
+# ============================================================================
+# 
+# ✅ Este .gitignore protege:
+# - Arquivo .env com variáveis sensíveis
+# - Chaves de API e secrets
+# - Arquivos de banco de dados local
+# - Tokens de autenticação
+# - Informações de deployment
+#
+# ❌ Se você ver qualquer desses no Git:
+# 1. Remova com: git rm --cached filename
+# 2. Regenere suas chaves (foram expostas!)
+# 3. Adicione ao .gitignore
+# 4. Faça commit da mudança
+#
+# 🔒 IMPORTANTE: Antes de cada push, verificar:
+# - git status (não deve mostrar .env)
+# - git diff --cached (não deve ter secrets)
+# ============================================================================
